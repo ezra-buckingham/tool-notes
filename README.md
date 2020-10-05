@@ -2,8 +2,8 @@
 ## Recon Tools
 * Nmap
 * Netdiscover
-* theHarvester
+* [theHarvester](./theHarvester.md)
 ## Exploitation Tools
-* Metasploit
+* [Metasploit](./metasploit.md)
 ## Priviledge Escalation Tools
 * LinPeas
