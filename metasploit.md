@@ -1,4 +1,4 @@
-### Metaploit Notes
+# Metaploit Notes
 ## Common Commands
 `search <software>` : will search for vulerabilities in that software
 `use <either # from search or exploit path>` : will use the specific exploit listed
