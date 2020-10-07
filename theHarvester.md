@@ -9,7 +9,7 @@ A tool for open source intelligence gathering and helping to determine a company
 ## Options
 `-d <domain>`
 `-l <limit number of results>`
-`-b <search engines to use seperated by commas>`
+`-b <search engines to use seperated by commas>` can use the `all` to search all domains
 `-c` Will brute force common domain names to find hidden domains
 `-n` Will do a DNS lookup to ensure you are finding what is hosting each server
 ## Example Executions

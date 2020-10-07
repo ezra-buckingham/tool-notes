@@ -3,6 +3,7 @@
 * Nmap
 * Netdiscover
 * [theHarvester](./theHarvester.md)
+* [Recon-ng](./recon-ng.md)
 ## Exploitation Tools
 * [Metasploit](./metasploit.md)
 ## Priviledge Escalation Tools
