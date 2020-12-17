@@ -6,5 +6,8 @@
 * [Recon-ng](./recon-ng.md)
 ## Exploitation Tools
 * [Metasploit](./metasploit.md)
+## Web Tools
+* gobuster
+* wfuzz
 ## Priviledge Escalation Tools
 * LinPeas
