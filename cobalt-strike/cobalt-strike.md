@@ -1,15 +1,18 @@
 # Cobalt Strike Notes
 
+Items to research more:
+* MSF Staging Protocol
+
 **_Table of Contents_**:
-1) Operations
-2) Infrastructure
-3) C2
-4) Weponization
-5) Initial Access
-6) Post Exploitation
-7) Priviledge Escalation
-8) Lateral Movement
-9) Pivoting
+1) [Operations](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#1-operations)
+2) [Infrastructure](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#2-infrastructure)
+3) [C2](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#3-c2-command-and-control)
+4) [Weponization](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#4-weponization)
+5) [Initial Access](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#5-initial-access)
+6) [Post Exploitation](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#6-post-exploitation)
+7) [Priviledge Escalation](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#7-priviledge-escalation)
+8) [Lateral Movement](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#8-lateral-movement)
+9) [Pivoting](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#9-pivoting)
 
 
 **_Overview_**:
@@ -120,6 +123,59 @@ _Local Access Manager (Shell Sherpa)_
 -------------
 
 ## 2) Infrastructure
+
+### Listener Management
+What is a listener?
+* A configuration for a cobalt strike payload (and payload server)
+* Different types of listeners
+  * Egress - a payload the beacons out of a network
+  * Peer-to-peer - a payload that communicates through a parent payload
+  * Alias - a reference to a payload handler elsewhere (eg in another toolset)
+* Manage using Cobalt Srike > Listeners
+
+### Beacon Payloads
+_Payload Staging_
+* What is stager?
+  * A tiny program that downloads a payload and passes execution to it (needed for size-constrained attacks)
+  * Based on Metasploit framework staging protocol 
+* Stageless means payload without a stager
+* Stagers are (most of newer versions of Cobalt rely less on these):
+  * Less secure
+  * More brittle
+  * Easier to detect
+
+_HTTP/S Beacon_
+* A Payload contained on the target machine that makes a GET request to the C2 server to get instructions for the payload to execute (in an enxrypted blob of data)
+* The get request, if containing instructions for the HTTP beacon, will after completion of the tasks, will wespond with a POST request to the C2 server with the output (in an encrypted blob of data) from the tasks
+* When configuring one, you can give a comma seperated list of callback hosts to callback many different hosts
+  * Can give IPv4, IPv6, or a FQDN
+  * Can also give a proxy config for the beacon
+* Remember that only a single service can hold a single port so you cannot have a beacon on port 80 and a web server running at the same time
+
+_DNS Beacon_
+* Uses a DNS lookup to send back instructions to the beacon on tasks to complete
+* This was used as a way to minimize the number of HTTP requests that are made to the C2 server (if no task was required, the beacon response from the A record DNS request would be 0.0.0.0, but if there were required tasks, the server would respond with an IP address to get from)
+
+![DNS](./assets/DNSBeacon.png "DNS")
+
+_How to deliver the Beacon_
+* It can deliver via a scripted web delivery in which Cobalt Strike will deliver a one-line script that will allow you pull the beacon over the web to the target
+
+_Redirectors_
+* You may use a redirector to obfuscate exactly where your team server is located
+* You can do this by using iptables, socat, or other tool to forward traffic to your CS team server
+  `socat TCP4-LISTEN:80,fork TCP4:[teamserver]:80`
+* You can use Apache ot Nginx reverse proxy config
+* You can use a CDN (ex. AWS Cloud Front) as a redirector for HTTPS traffic (called "domain fronting")
+  * You will need to use a valid SSL certificate
+  * Allow the HTTP POST and HTTP GET vers
+  * Consider HTTP-GET only C2
+  * Disable all cache options
+  * Be aware of transformed requests! (changing cookie value)
+  * Also this allows us to make the server look fully legit because a CDN is used by hundreds of legitimate companies
+  * You can make the beacon override the requested host from "google.com" to "malicious.com"
+    * Some proxy servers will normalize the data and not allow domain fronting to work as well as it used to
+    * SSL will change this because it goes in an encrypted format and the proxy may not always be able to see that (only if the organization does man in the middle communication with the proxy will they catch the domain forwarding)
 
 -------------
 
