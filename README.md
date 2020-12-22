@@ -1,4 +1,6 @@
 # Ezra's Notes on Pentesting Tools
+## Full Attack Tools
+* Cobalt Strike
 ## Recon Tools
 * Nmap
 * Netdiscover
