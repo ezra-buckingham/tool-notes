@@ -1,5 +1,17 @@
 # Cobalt Strike Notes
 
+**_Table of Contents_**:
+1) Operations
+2) Infrastructure
+3) C2
+4) Weponization
+5) Initial Access
+6) Post Exploitation
+7) Priviledge Escalation
+8) Lateral Movement
+9) Pivoting
+
+
 **_Overview_**:
 
 This tool is not a magic wand to every scenario and remember that you must always be considering evasion tactics (you MUST know your tools and the best option to evade) as there are so many different monitoring solutions as well as teams on networks that defend against APT groups. 
