@@ -32,6 +32,15 @@ Create relevant and credible adversary simulations that:
 * Drive objective and meaningful security advances
 * Educate security professionals and decision makers on advanced threat tactics
 
+**_Basic Usage_**
+
+Starting the team server: `./teamserver <ip address of machine> <password>`
+
+Starting the client: `./cobaltstrike`
+
+Notes:
+* The IP address is where you will be able to access the team server
+
 **_Tools Within Cobalt Strike_**:
 * **Beacon**
   * Cobalt Strike's Payload
@@ -155,8 +164,30 @@ _HTTP/S Beacon_
 _DNS Beacon_
 * Uses a DNS lookup to send back instructions to the beacon on tasks to complete
 * This was used as a way to minimize the number of HTTP requests that are made to the C2 server (if no task was required, the beacon response from the A record DNS request would be 0.0.0.0, but if there were required tasks, the server would respond with an IP address to get from)
+* Sometimes this inital A record request will work BUT then the HTTP request following will be blocked. You can get around this, by using the `mode [dns | dns6 | dns-txt]` in CS and retreiving tasks in smaller byte chunks at a time by making a bunch of A record requests and gaining access to the payload again
+
+_DNS Beacon Set Up_
+1. Edit Zone File for a domain you control
+2. Create an A record for CS server
+3. Create an NS record that points to FQDN of the CS server
 
 ![DNS](./assets/DNSBeacon.png "DNS")
+
+_SMB Beacon_
+* This beacon utilizes the named pipes funcationality for windows
+* It uses a child beacon and a parent beacon (an egress beacon and peer-to-peer beacons)
+* It uses the port 445 SMB protocol to communcate peer-to-peer
+* You can see the lineage of beacons by going to Cobalt Strike > Visualization > Pivot Graph
+
+_SMB Beacon Usage_
+* You can link and unlink to a SMB beacon to keep your payload on the machine, but dormant
+  * Link Beacon to peer `link [host] [pipe]`
+  * De-link Beacon to peer `unlink [host] [pid]`
+* You can also create a TCP p2p beacon and do the same as the SMB p2p beacon
+  * Link Beacon to peer `connect [host] [port]`
+  * De-link Beacon to peer ``unlink [host] [pid]`
+
+![SMB](./assets/SMBBeacon.png "SMB")
 
 _How to deliver the Beacon_
 * It can deliver via a scripted web delivery in which Cobalt Strike will deliver a one-line script that will allow you pull the beacon over the web to the target
