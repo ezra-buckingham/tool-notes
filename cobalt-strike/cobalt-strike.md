@@ -1,6 +1,7 @@
 # Cobalt Strike Notes
 
-Items to research more:
+Left Off at:
+* Part 3 - 58.27
 * MSF Staging Protocol
 
 **_Table of Contents_**:
@@ -211,6 +212,106 @@ _Redirectors_
 -------------
 
 ## 3) C2 (Command and Control)
+
+### Malleable C2
+
+_Overview_
+* Domain-specific language to give you control over the indicators in the beacon payload
+  * Network traffic
+  * In-memory content, characteristics, and behavior
+  * Process injection behavior
+* This isbound to the server when staring the team server
+* You can set this profile up to obfuscate the data when sending across the network
+* You can set the profile to chunk the output so that it is less suspicious (HTTP Get-Only C2)
+  * This can be done by doing `set verb "GET";` in your `http-post` option (this is not the actual option to set for chunking)
+  * Setting to HTTP GET only will make it not very performant compared to POST
+* You can also set profile variants that have slightly different variations in the profile (this is set when you create a listener) and is done by using the `<block> "variant name" {}`
+* Always lint your profile using the `./c2lint <c2ProfilePath>` tool
+  * It can give you some powerful linting to show you what errors you may have if using that profile in with a beacon
+
+_Profile Components_
+* Options
+  * the `set` keyword will set the http option and the option will always be wrapped in double-quotes
+  * the `set` keyword can also be placed into a type of request such as `http-get` like the example below
+* Blocks
+  * A way of grouping indicators by a specific method/behavior
+  * You can also change the behavior based on if it is a request coming from the server or client
+
+```
+http-get {
+  #indicators here
+  # How beacon downloads tasks
+  client { }
+  server { }
+}
+http-post {
+  #indicators here
+  # How beacon uploads output back to team server
+}
+http-stager {
+  #indicators here
+  # Shapes content of the staging process
+}
+```
+
+* Extraneous indicators
+  * Think of these as the HTTP headers that you can set as extraneous
+* Transforms
+  * These fall under the metadata and tell the client beacon to transform the data (and they are done in order)
+  * Think of these as functions that will be executed by the beacon before sending
+
+_Example of Profile_
+
+```
+set useragent "Mozilla/5.0 (compatible; MISE 8.0;)"
+
+http-get {
+  set uri "/image/";
+  client {
+    header "Accept" "text/html,application/xhtml";
+    header "Referer "htpp://www.google.com";
+    header "Pragma" "no-cache";
+    header "Cache-Control" "no-cache";
+    metadata {
+      netbios;
+      append "-.jpg";
+      uri-append;
+    }
+  }
+}
+```
+
+![c2 Key Blocks](./assets/MalleableC2.png "c2 Key Blocks")
+
+### Egress & Network Evasion
+
+_The Problems We Encounter_
+* Some firewalls may deny all outbound traffic
+* Some networks only allow egress through a proxy device
+  * This means that attack traffic must conform to an expected protocol as well as other checks
+* Additionally, there may be network monitoring that we must evade
+  * There are systems that run looking for IOC's or Indicators of Compromise on the network
+  * The network may alerady have Cobalt Strike ID'd as an IOC 
+
+_HTTP/S Proxy Details in Cobalt Strike_
+* This is all built on the WinINet (Internet Explorer is built on this)
+* It will use the IE proxy settings for the current user
+  * If IE can get out, you can get out unless the current user has no proxy config
+  * The stagers and payloads in CS will prompt the user if proxy authentication fails
+* You can use custom proxy settings if necesary
+  * This can be risky because it shows up in the HTTP traffic and if there are creds in that payload, it can get exposed and leaked (risk/reward)
+* **Note**: WinINet library may have TLS limitations that are incompatible with your redirector
+
+_Profile Tips_
+* Do not use public profiles examples in production
+* Do not allow an empty http-get > server > output > or http-post > server > output response
+  * Use `prepend` to prepend junk data and `mask` to transform and randomize it
+* Change URIs and use `prepend` to mask indications of comproimise in `http-stager` block (if you are going to allow staging)
+* Use `http-config` block to standardize server headers and header order in all HTTP server responses
+* Use plausible `set useragent` value for the target network
+* Use HTTP GET-nly C2 for difficult egress situations
+
+
 
 -------------
 
