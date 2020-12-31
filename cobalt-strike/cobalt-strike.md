@@ -1,8 +1,7 @@
 # Cobalt Strike Notes
 
-Left Off at:
-* Part 3 - 58.27
-* MSF Staging Protocol
+Things to Look more into...
+* Metasploit staging framework
 
 **_Table of Contents_**:
 1) [Operations](https://github.com/ezra-buckingham/tool-notes/blob/main/cobalt-strike/cobalt-strike.md#1-operations)
@@ -167,6 +166,11 @@ _DNS Beacon_
 * This was used as a way to minimize the number of HTTP requests that are made to the C2 server (if no task was required, the beacon response from the A record DNS request would be 0.0.0.0, but if there were required tasks, the server would respond with an IP address to get from)
 * Sometimes this inital A record request will work BUT then the HTTP request following will be blocked. You can get around this, by using the `mode [dns | dns6 | dns-txt]` in CS and retreiving tasks in smaller byte chunks at a time by making a bunch of A record requests and gaining access to the payload again
 
+_DNS C2 Details_
+* The CS DNS TXT Stager will require 1,000+ TXT records to download the Beacon
+* If the host can resolve names, then you can get out
+* The DNS Beacon payload has optinos for DNS A, DNS AAAA, and DNS TXT for C2 and keep in mind that each mode reduces maximum hostname length used to send data back to CS
+
 _DNS Beacon Set Up_
 1. Edit Zone File for a domain you control
 2. Create an A record for CS server
@@ -304,14 +308,90 @@ _HTTP/S Proxy Details in Cobalt Strike_
 
 _Profile Tips_
 * Do not use public profiles examples in production
+  * This will make it easier to get caught
 * Do not allow an empty http-get > server > output > or http-post > server > output response
   * Use `prepend` to prepend junk data and `mask` to transform and randomize it
+  * This is important because we need it to look like legitimate traffic (think of a get request with content length of 0)
 * Change URIs and use `prepend` to mask indications of comproimise in `http-stager` block (if you are going to allow staging)
+  * Because you will be staging a payload, you NEED to try and mask that URI so it doesn't look suspicious
+  * Avoid using content type of `application/octet-stream` because that is not very normal/common
 * Use `http-config` block to standardize server headers and header order in all HTTP server responses
 * Use plausible `set useragent` value for the target network
 * Use HTTP GET-nly C2 for difficult egress situations
+  * Consider using it when using stagers in an unkown network because that will cause the least friction
 
+_Network Security Monitoring Tips_
+* Use an Apache, Nginx, or a CDN as a redirector 
+  * This will smooth the Cobalt Strike-specific indicators, give you a better JA3S fingerprint, etc
+  * JA3 (add the S if talking about the server) is a way at looking at the handshake process of TLS traffic and generating a hash based on the alogrithms used on both the client and server
+    * Our team server responds with a JA3S figerprint saying that the server is runnning Java on Debian
+    * However, using a CDN will show a JA3S fingerprint saying that the server is running Apache or something more normal
+* Invest in your infrastructure
+  * Host redirectors on different providers
+  * Domains are better with age and categorization
+    * Newer & Uncategorized domains are sus
+  * No not use IPv4 addresses for C2
+  * Have a valid SSL Cert (DO NOT Use the CS default cert)
+* Operate "low and slow"
+  * Set higher beacon sleep intervals
+  * Find the interval that allows you just enough access to accomplish your objectives
 
+_Common DNS C2 Prevention and Tips for Overcoming those Tactics_
+* Use Split-Split DNS
+  * Having your proxy do the DNS lookup if needed for servers outside of network (client unable to query against DNS)
+  * **Solution:** Do not use DNS C2
+* Look at the volume of DNS requests
+  * Seeing a massive amount of DNS traffic would look sketch
+  * **Solution:** Use DNS C2 as low and slow fallback option ONLY
+* Look for Cobalt Strike DNS C2 IOCs
+  * **Solution:** Use `dns_stager_prepend` and `dns_stager_subhost`
+* Look for Bogon IP addresses
+  * For example, seeing `0.0.0.0` would not make sense so this could look suspicious
+  * **Solution:** Change `dns_idle` in profile and avoid `mode dns` as this will send bogon responses
+* Look for length of request hostnames
+  * **Solution:** Set `dns_max_txt` to limit TXT length and set `maxdns` to limit hostname length
+
+_Tips for P2P Beacons_
+* Use the SMB Beacon and TCP Beacon for...
+  * Processes that run as SYSTEM
+  * Targets that cannot reach the internet
+* Use the TCP Beacon bound to localhost for local-host only priviledge escalation actions
+
+_Tips for Communication Paths_
+* Don't
+  * Servers should not egress
+  * SMB Beacon from server to workstation is WEIRD
+  * Scan to find targets (creates lots of noise on the wire)
+* Do
+  * Egress from plausible user processes on workstations
+    * Think of all the processes that WinInet runs (see image below)
+  * Use SMB Beacon from workstations to servers
+  * Use built-in Windows tools and APIs to find targets
+
+![Plausible Processes](./assets/PlausibleProcesses.png "Plausible Processes")
+
+_Infrastructure OPSEC (Finding other CS Servers & How to hide yours)_
+* How to find them on the internet?
+  * The Default (self-signed) SSL Cert
+    * **Solution:** Use valid SSL cert; Use Apache, Nginx, or CDN; Only alow HTTP/S connections from redirectors
+  * `0.0.0.0` DNS response
+    * **Solution:** Set `dns_idle` in Malleable C@
+  * Port 50050 open
+    * **Solution:** Firewall port 50050 and access via SSH
+  * Empty index page, 404, `text/plain` Content-Type
+    * **Solution:** Host content on your redirectors
+* How to verify team server?
+  * Connect to it and ask foor a payload (staging)
+  * Eg) `wget -U "Internet Explorer" http://<server>/vI6D`
+  * **Solution:** Set `host_stage` to false in Malleable C2 (this disables hosted payload for staging purposes)
+
+_Payload Security Features_
+* Beacon payload authenticates the team server
+* Beacon tasks and output are encrypted
+* Beacon has replay protection for tasks
+* Payload stagers DO NOT have security features
+
+![Payload Sec](./assets/PayloadSec.png "Payload Sec")
 
 -------------
 
