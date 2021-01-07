@@ -2,7 +2,7 @@
 
 ## C2 Tools
 
-* [Cobalt Strike](./cobalt-strike/cobalt-strike.md)
+* [Cobalt Strike](./c2/cobalt-strike/cobalt-strike.md)
 
 ## Recon Tools
 
