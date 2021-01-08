@@ -11,6 +11,7 @@
 * [theHarvester](./theHarvester.md)
 * [Recon-ng](./recon-ng.md)
 * [Enum4Linux](./enum4linux.md)
+* [Kerbrute](./kerbrute.md)
 
 ## Exploitation Tools
 
