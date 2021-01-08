@@ -4,12 +4,13 @@
 
 * [Cobalt Strike](./c2/cobalt-strike/cobalt-strike.md)
 
-## Recon Tools
+## Recon/Enumeration Tools
 
 * Nmap
 * Netdiscover
 * [theHarvester](./theHarvester.md)
 * [Recon-ng](./recon-ng.md)
+* [Enum4Linux](./enum4linux.md)
 
 ## Exploitation Tools
 
