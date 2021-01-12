@@ -35,7 +35,7 @@ _Text Viewers/Editors_
 ## Malware Analysis
 
 * [Cuckoo](https://cuckoosandbox.org/)
- * Allows you to spin up realistic environments to throw malware at
+  * Allows you to spin up realistic environments to throw malware at
 
 ## Infrastructure Tools
 
