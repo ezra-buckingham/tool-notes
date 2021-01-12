@@ -32,6 +32,11 @@ _Text Viewers/Editors_
 
 * [Less](./less.md)
 
+## Malware Analysis
+
+* [Cuckoo](https://cuckoosandbox.org/)
+ * Allows you to spin up realistic environments to throw malware at
+
 ## Infrastructure Tools
 
 * [pyKMS](https://py-kms.readthedocs.io/en/latest/)
