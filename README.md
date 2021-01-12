@@ -31,3 +31,8 @@
 _Text Viewers/Editors_
 
 * [Less](./less.md)
+
+## Infrastructure Tools
+
+* [pyKMS](https://py-kms.readthedocs.io/en/latest/)
+  * Allows you to activate windows keys by spinning up a reverse-engineered KMS
