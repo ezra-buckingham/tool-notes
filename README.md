@@ -31,6 +31,7 @@
 _Text Viewers/Editors_
 
 * [Less](./less.md)
+* [Vim](./vim.md)
 
 ## Malware Analysis
 
